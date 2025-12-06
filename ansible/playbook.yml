@@ -1,0 +1,66 @@
+- name: Deploy Orders API
+  hosts: api
+  become: yes
+  
+  tasks:
+    - name: Actualizar paquetes
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+    - name: Instalar dependencias
+      package:
+        name:
+          - python3
+          - python3-pip
+          - python3-venv
+          - git
+        state: present
+    - name: Crear carpeta de aplicación
+      file:
+        path: /opt/api
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user }}"
+    - name: Copiar de aplicación
+      copy:
+        src: ../app/main.py
+        dest: /opt/api/main.py
+        mode: '0644'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+    - name: Copiar dependencias de aplicación
+      copy:
+        src: ../requirements.txt
+        dest: /opt/api/requirements.txt
+        mode: '0644'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+    - name: Crear entorno virtual
+      command: python3 -m venv /opt/api/.venv
+      args:
+        creates: /opt/api/.venv/bin/activate
+    - name: Instalar dependencias de aplicación
+      pip:
+        requirements: /opt/api/requirements.txt
+        virtualenv: /opt/api/.venv
+    - name: Iniciar aplicación
+      command: .venv/bin/python3 /opt/api/main.py
+      args:
+        chdir: /opt/api
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

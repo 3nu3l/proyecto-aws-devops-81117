@@ -21,14 +21,6 @@ resource "aws_security_group" "ejemplo_iac" {
   description = "Security group para ejemplo IAC"
   vpc_id      = data.aws_vpc.default.id
 
-  ingress {
-    description = "SSH access"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -41,11 +33,28 @@ resource "aws_security_group" "ejemplo_iac" {
   }
 }
 
+resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4" {
+  security_group_id = aws_security_group.ejemplo_iac.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_api_port_ipv4" {
+  security_group_id = aws_security_group.ejemplo_iac.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 8000
+  ip_protocol       = "tcp"
+  to_port           = 8000
+}
+
 # Instancia EC2
 resource "aws_instance" "ejemplo" {
   ami           = "ami-0ecb62995f68bb549" # Ubuntu 24.04
   instance_type = "t3.micro"
   subnet_id     = data.aws_subnet.default.id
+  key_name      = "edit-81117"
 
   vpc_security_group_ids = [aws_security_group.ejemplo_iac.id]
 

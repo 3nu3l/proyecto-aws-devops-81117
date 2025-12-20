@@ -43,24 +43,30 @@
       pip:
         requirements: /opt/api/requirements.txt
         virtualenv: /opt/api/.venv
-    - name: Iniciar aplicación
-      command: .venv/bin/python3 /opt/api/main.py
-      args:
-        chdir: /opt/api
+    - name: Crear servicio systemd
+      copy:
+        content: |
+          [Unit]
+          Description=Orders API Service
+          After=network.target
 
+          [Service]
+          Type=simple
+          User={{ ansible_user }}
+          WorkingDirectory=/opt/api
+          ExecStart=/opt/api/.venv/bin/python3 /opt/api/main.py
+          Restart=always
+          RestartSec=10
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/orders-api.service
+        mode: '0644'
+    - name: Recargar systemd
+      systemd:
+        daemon_reload: yes
+    - name: Habilitar servicio orders-api
+      systemd:
+        name: orders-api
+        enabled: yes
+        state: started

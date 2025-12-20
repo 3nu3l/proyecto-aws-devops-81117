@@ -17,7 +17,7 @@ data "aws_subnet" "default" {
 
 # Security group para la instancia
 resource "aws_security_group" "ejemplo_iac" {
-  name        = "ejemplo-iac-sg"
+  name        = var.sg_name
   description = "Security group para ejemplo IAC"
   vpc_id      = data.aws_vpc.default.id
 
@@ -25,20 +25,20 @@ resource "aws_security_group" "ejemplo_iac" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.allowed_cidr_blocks
   }
 
   tags = {
-    Name = "ejemplo-iac-sg"
+    Name = var.sg_name
   }
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4" {
   security_group_id = aws_security_group.ejemplo_iac.id
   cidr_ipv4         = "0.0.0.0/0"
-  from_port         = 22
+  from_port         = var.ssh_port
   ip_protocol       = "tcp"
-  to_port           = 22
+  to_port           = var.ssh_port
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_api_port_ipv4" {

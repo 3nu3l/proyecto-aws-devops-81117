@@ -72,22 +72,22 @@ resource "aws_instance" "ejemplo" {
   }
 }
 
-module "ec2_instance" {
-  source  = "terraform-aws-modules/ec2-instance/aws"
+# module "ec2_instance" {
+#   source  = "terraform-aws-modules/ec2-instance/aws"
 
-  name = "single-instance"
+#   name = "single-instance"
 
-  instance_type = var.instance_type
-  key_name      = var.key_name
-  monitoring    = true
-  subnet_id     = data.aws_subnet.default.id
+#   instance_type = var.instance_type
+#   key_name      = var.key_name
+#   monitoring    = true
+#   subnet_id     = data.aws_subnet.default.id
 
-  tags = {
-    Name        = "${var.environment}-ejemplo-iac-instance"
-    Environment = var.environment
-    ManagedBy   = "terraform"
-  }
-}
+#   tags = {
+#     Name        = "${var.environment}-ejemplo-iac-instance"
+#     Environment = var.environment
+#     ManagedBy   = "terraform"
+#   }
+# }
 
 # Outputs para mostrar información de la instancia
 output "instance_id" {

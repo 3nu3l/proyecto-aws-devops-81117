@@ -19,3 +19,15 @@ variable "ssh_port" {
     type = number
     default = 22
 }
+
+variable "key_name" {
+    description = "Nombre de la llave SSH"
+    type = string
+    default = "edit-81117"
+}
+
+variable "instance_type" {
+    description = "Tipo de instancia"
+    type = string
+    default = "t3.micro"
+}

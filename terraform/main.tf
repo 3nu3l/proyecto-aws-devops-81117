@@ -52,9 +52,9 @@ resource "aws_vpc_security_group_ingress_rule" "allow_api_port_ipv4" {
 # Instancia EC2
 resource "aws_instance" "ejemplo" {
   ami           = "ami-0ecb62995f68bb549" # Ubuntu 24.04
-  instance_type = "t3.micro"
+  instance_type = var.instance_type
   subnet_id     = data.aws_subnet.default.id
-  key_name      = "edit-81117"
+  key_name      = var.key_name
 
   vpc_security_group_ids = [aws_security_group.ejemplo_iac.id]
 
@@ -68,6 +68,23 @@ resource "aws_instance" "ejemplo" {
   tags = {
     Name        = "ejemplo-iac-instance"
     Environment = "testing"
+    ManagedBy   = "terraform"
+  }
+}
+
+module "ec2_instance" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+
+  name = "single-instance"
+
+  instance_type = var.instance_type
+  key_name      = var.key_name
+  monitoring    = true
+  subnet_id     = data.aws_subnet.default.id
+
+  tags = {
+    Name        = "${var.environment}-ejemplo-iac-instance"
+    Environment = var.environment
     ManagedBy   = "terraform"
   }
 }

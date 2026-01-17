@@ -1,42 +1,37 @@
-FROM python:3.12.12-slim
+# ============================================
+# Stage 1: Builder - Instalación de dependencias
+# ============================================
+FROM python:3.11-slim AS builder
 
-WORKDIR /opt/api
+WORKDIR /app
 
+# Instalar dependencias del sistema necesarias para compilar paquetes Python
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar requirements y instalar dependencias
 COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
 
-RUN pip install -r requirements.txt
+# ============================================
+# Stage 2: Runtime - Imagen final optimizada
+# ============================================
+FROM python:3.11-slim AS runtime
 
-COPY app/main.py .
+WORKDIR /app
 
+# Copiar solo las dependencias instaladas desde el builder
+COPY --from=builder /root/.local /root/.local
+
+# Asegurar que los scripts estén en el PATH
+ENV PATH=/root/.local/bin:$PATH
+
+# Copiar solo el código de la aplicación
+COPY app/ app/
+
+# Exponer el puerto
 EXPOSE 8000
 
-CMD ["python", "/opt/api/main.py"]
-
-
-# FROM python:3.12.12-slim AS builder
-
-# #docker build . -t orders-api --build-arg ARG_PYTHONUNBUFFERED=1
-# #ARG ARG_PYTHONUNBUFFERED
-# #ENV PYTHONUNBUFFERED=${ARG_PYTHONUNBUFFERED}
-
-# WORKDIR /opt/api
-
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#     gcc \
-#     && rm -rf /var/lib/apt/lists/*
-
-# COPY requirements.txt .
-
-# RUN pip install --no-cache-dir -r requirements.txt
-
-# FROM python:3.12.12-slim AS runner
-
-# COPY --from=builder /root/local /root/local
-
-# WORKDIR /opt/api
-
-# COPY app/main.py /opt/api/main.py
-
-# EXPOSE 8000
-
-# CMD ["python", "/opt/api/main.py"]
+# Comando por defecto
+CMD ["python", "app/main.py"]

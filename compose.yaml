@@ -1,0 +1,5 @@
+services:
+  orders-api:
+    image: 781013578291.dkr.ecr.us-east-1.amazonaws.com/81117/orders-api:1.1.1
+    ports:
+      - 8000:8000

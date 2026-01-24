@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+*.pem
+*.lock.hcl
+.terraform/
+.vagrant/
+ansible/
+terraform/
+tests/
+vagrant/
+README.md
+.gitignore

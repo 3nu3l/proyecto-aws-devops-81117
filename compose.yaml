@@ -1,5 +1,12 @@
 services:
   orders-api:
-    image: 781013578291.dkr.ecr.us-east-1.amazonaws.com/81117/orders-api:1.1.1
+    #image: 781013578291.dkr.ecr.us-east-1.amazonaws.com/81117/orders-api:1.1.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ENV_TYPE=local
+    env_file:
+      - .env
     ports:
       - 8000:8000

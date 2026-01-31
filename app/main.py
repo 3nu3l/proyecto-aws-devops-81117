@@ -1,7 +1,12 @@
+import os
+
 from flask import Flask, jsonify, request
 
 def create_app():
     app = Flask(__name__)
+
+    env_type = os.getenv("ENV_TYPE", "not_set")
+    db_password = os.getenv("DB_PASSWORD", "not_set")
 
     orders = [
         {"id": 1, "item": "Libro", "quantity": 1},
@@ -10,7 +15,16 @@ def create_app():
 
     @app.route("/health", methods=["GET"])
     def health():
-        return jsonify({"status": "ok"}), 200
+        return (
+            jsonify(
+                {
+                    "status": "ok",
+                    "env_type": env_type,
+                    "db_password_configured": db_password != "not_set",
+                }
+            ),
+            200,
+        )
 
     @app.route("/orders", methods=["GET"])
     def list_orders():

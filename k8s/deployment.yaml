@@ -22,4 +22,4 @@ spec:
           #  - name: ENV_TYPE
           #    value: minikube
       imagePullSecrets:
-        - name: registry-creds-ecr
+      - name: regcred

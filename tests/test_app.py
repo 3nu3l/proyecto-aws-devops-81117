@@ -19,7 +19,7 @@ def test_health_unit():
     with app.test_request_context("/health"):
         resp, status = app.view_functions["health"]()
     assert status == 200
-    assert resp.json == {"status": "ok"}
+    assert resp.json == {"status": "ok", "env_type": "not_set", "db_password_configured": False}
 
 
 def test_list_orders_unit():

@@ -9,7 +9,6 @@ __pycache__/
 .vagrant/
 ansible/
 terraform/
-tests/
 vagrant/
 README.md
 .gitignore

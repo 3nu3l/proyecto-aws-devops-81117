@@ -29,6 +29,7 @@ ENV PATH=/root/.local/bin:$PATH
 
 # Copiar solo el código de la aplicación
 COPY app/ app/
+COPY tests/ tests/
 
 # Exponer el puerto
 EXPOSE 8000

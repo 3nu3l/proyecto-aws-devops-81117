@@ -63,3 +63,11 @@
           - "50000:50000"
         volumes:
           - /var/jenkins_home:/var/jenkins_home
+          - /var/run/docker.sock:/var/run/docker.sock
+
+    - name: Instalación de docker, aws y git dentro del contenedor Jenkins
+      ansible.builtin.shell: |
+        docker exec jenkins bash -c "
+          apt-get update &&
+          apt-get install -y docker.io git awscli
+        "

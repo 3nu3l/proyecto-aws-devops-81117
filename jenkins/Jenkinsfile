@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clean WS') {
+            steps{
+                deleteDir()
+            }
+        }
+        
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/3nu3l/proyecto-aws-devops-81117.git'
+            }
+        }
+        
+        stage('Build Image') {
+            steps {
+                sh """
+                docker build . -t 781013578291.dkr.ecr.us-east-1.amazonaws.com/81117/orders-api:latest
+                """
+            }
+        }
+        
+        stage('Tests') {
+            steps {
+                sh """
+                docker run --rm 781013578291.dkr.ecr.us-east-1.amazonaws.com/81117/orders-api:latest pytest tests
+                """
+            }
+        }
+        
+        stage ('Login to ECR') {
+            steps {
+                sh """
+                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 781013578291.dkr.ecr.us-east-1.amazonaws.com
+                """
+            }
+        }
+        
+        stage('Docker push') {
+            steps {
+                sh """
+                docker push 781013578291.dkr.ecr.us-east-1.amazonaws.com/81117/orders-api:latest
+                """
+            }
+        }
+    }
+}

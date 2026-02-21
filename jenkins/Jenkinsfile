@@ -45,25 +45,31 @@ pipeline {
             }
         }
         stage('Update Helm Values') {
-    steps {
-        withCredentials([usernamePassword(credentialsId: 'github-app-81117', 
-                         passwordVariable: 'GIT_PASSWORD', 
-                         usernameVariable: 'GIT_USERNAME')]) {
-            script {
-                sh "sed -i 's/tag: .*/tag: \"${IMAGE_TAG}\"/' k8s/orders-api-helm/values.yaml"
-                
-                sh """
-                    git config user.email "jenkins@81117.com"
-                    git config user.name "Jenkins CI"
-                    git add k8s/orders-api-helm/values.yaml
-                    git commit -m "Update image tag to ${IMAGE_TAG}"
-                    
-                    # Usamos las variables que Jenkins genera automáticamente para la App
-                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/3nu3l/proyecto-aws-devops-81117.git main
-                """
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github-app-81117', 
+                                passwordVariable: 'GIT_PASSWORD', 
+                                usernameVariable: 'GIT_USERNAME')]) {
+                    script {
+
+                        sh """
+                        rm -rf helm-repo
+                        git clone https://github.com/3nu3l/proyecto-aws-devops-81117-helm.git
+                        """
+                        
+                        dir('helm-repo') {
+                            sh "sed -i 's/tag: .*/tag: \"${IMAGE_TAG}\"/' values.yaml"
+                            
+                            sh """
+                                git config user.email "jenkins@81117.com"
+                                git config user.name "Jenkins CI"
+                                git add values.yaml
+                                git commit -m "Update image tag to ${IMAGE_TAG}"
+                                git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/3nu3l/proyecto-aws-devops-81117-helm.git main
+                            """
+                        }
+                    }
+                }
             }
         }
-    }
-}
     }
 }

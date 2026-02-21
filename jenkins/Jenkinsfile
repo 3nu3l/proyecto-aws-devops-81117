@@ -33,9 +33,15 @@ pipeline {
             }
         }
         
+        stage('Build Image for Tests') {
+            steps {
+                sh "docker build . -t ${FULL_IMAGE}-test"
+            }
+        }
+        
         stage('Tests') {
             steps {
-                sh "docker run --rm ${FULL_IMAGE} pytest tests"
+                sh "docker run --rm ${FULL_IMAGE}-test pytest tests"
             }
         }
         

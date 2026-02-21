@@ -1,9 +1,17 @@
 pipeline {
     agent any
-
+    
+    environment {
+        AWS_REGION = 'us-east-1'
+        ECR_URL = '781013578291.dkr.ecr.us-east-1.amazonaws.com/81117/orders-api'
+        AWS_ACCOUNT_ID = '781013578291'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        FULL_IMAGE = "${ECR_URL}:${IMAGE_TAG}"
+    }
+    
     stages {
         stage('Clean WS') {
-            steps{
+            steps {
                 deleteDir()
             }
         }
@@ -17,34 +25,45 @@ pipeline {
         
         stage('Build Image') {
             steps {
-                sh """
-                docker build . -t 781013578291.dkr.ecr.us-east-1.amazonaws.com/81117/orders-api:latest
-                """
+                sh "docker build . -t ${FULL_IMAGE} -t ${ECR_URL}:latest"
             }
         }
         
         stage('Tests') {
             steps {
-                sh """
-                docker run --rm 781013578291.dkr.ecr.us-east-1.amazonaws.com/81117/orders-api:latest pytest tests
-                """
+                sh "docker run --rm ${FULL_IMAGE} pytest tests"
             }
         }
         
-        stage ('Login to ECR') {
+        stage('Login & Push to ECR') {
             steps {
                 sh """
-                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 781013578291.dkr.ecr.us-east-1.amazonaws.com
+                aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                docker push ${FULL_IMAGE}
+                docker push ${ECR_URL}:latest
                 """
             }
         }
-        
-        stage('Docker push') {
-            steps {
+        stage('Update Helm Values') {
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'github-app-81117', 
+                         passwordVariable: 'GIT_PASSWORD', 
+                         usernameVariable: 'GIT_USERNAME')]) {
+            script {
+                sh "sed -i 's/tag: .*/tag: \"${IMAGE_TAG}\"/' k8s/orders-api-helm/values.yaml"
+                
                 sh """
-                docker push 781013578291.dkr.ecr.us-east-1.amazonaws.com/81117/orders-api:latest
+                    git config user.email "jenkins@81117.com"
+                    git config user.name "Jenkins CI"
+                    git add k8s/orders-api-helm/values.yaml
+                    git commit -m "Update image tag to ${IMAGE_TAG}"
+                    
+                    # Usamos las variables que Jenkins genera automáticamente para la App
+                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/3nu3l/proyecto-aws-devops-81117.git main
                 """
             }
         }
+    }
+}
     }
 }

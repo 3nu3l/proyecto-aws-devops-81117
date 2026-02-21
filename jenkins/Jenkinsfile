@@ -54,6 +54,7 @@ pipeline {
                         sh """
                         rm -rf helm-repo
                         git clone https://github.com/3nu3l/proyecto-aws-devops-81117-helm.git
+                        cd proyecto-aws-devops-81117-helm
                         """
                         
                         dir('helm-repo') {
